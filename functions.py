@@ -2,6 +2,9 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 import os
+import sys
+import torch
+from ultralytics import YOLO
 
 
 def hsv(img, hue: int, saturation:int, value:int):
@@ -100,3 +103,63 @@ scale_factor
   result = cv2.warpAffine(img, rotation_matrix, (new_width, new_height), borderMode=cv2.BORDER_CONSTANT, borderValue=(255, 255, 255))
 
   return result
+  
+
+def change_background_simple(img,background_img):
+  """"
+detech body then cut it from img then add bakhground to the img
+img: orginal image
+background_img: path to background image
+  """""  
+  # use YOLO8
+  model = YOLO('yolov8n.pt')  # مدل کوچک YOLOv8
+  height, width, _ = img.shape
+  # resize the background image to match the dimensions of the original image
+  background_img = cv2.resize(background_img, (width, height))
+
+  # detection with yolo
+  results = model(img)
+
+  # find area of body
+  for result in results:
+      for box in result.boxes:
+          if box.cls == 0:  # 0 class related to body
+              x1, y1, x2, y2 = map(int, box.xyxy[0])  
+              #cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 2) 
+              # cut the body from img
+              body = img[y1:y2, x1:x2]
+
+  background_img[y1:y2, x1:x2] = body
+  return background_img
+
+def change_background_segment(img,background_img):
+  """"
+detect and segmentation then change the background
+img: orginal image
+background_img: path to background image
+  """""  
+  # use YOLO8
+  model = YOLO('yolov8n-seg.pt') 
+  # read img and make background
+  height, width, _ = img.shape  # ابعاد تصویر اصلی
+  background_img = cv2.resize(background_img, (width, height))  # تغییر اندازه پس‌زمینه
+  # detection with yolo
+  results = model(img)
+  # find area of body
+  for result in results:
+      for box, mask in zip(result.boxes, result.masks):
+          if box.cls == 0:   # 0 class related to body
+              x1, y1, x2, y2 = map(int, box.xyxy[0])
+
+              # Segmentation mask
+              mask = mask.data[0].numpy() 
+              mask = cv2.resize(mask, (width, height))  
+              mask = (mask > 0.5).astype(np.uint8)  
+
+              # Isolation of the body using a mask
+              body = cv2.bitwise_and(img, img, mask=mask)
+
+              # Replace custom background
+              background_img[mask == 1] = img[mask == 1]
+
+  return background_img
