@@ -57,6 +57,8 @@ def pic_preproc(img_load_path: str, size: int):
       gray_img1 = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
       resized_img = cv2.resize(gray_img1, (size, size))
       gray_img2 = resized_img[:, :, np.newaxis]
+      # Normalize pixel values to be between 0 and 1
+      gray_img2 = gray_img2 / 255.0 
 
       # Add processed image to list
       all_images.append(gray_img2)
