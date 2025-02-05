@@ -39,3 +39,27 @@ segment_point: list of points to draw the bbox []
   # Draw a rectangle on the image
   cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
   return img
+  
+
+def pic_preproc(img_load_path: str, size: int):
+  """"
+  resize and add 1 dimention to the image.  return all images
+  img_load_path: path to the main img
+  size: size of Length and width
+  """""
+  # read imgs
+  image_paths = [os.path.join(img_load_path, img) for img in os.listdir(img_load_path) if img.endswith(".JPG") or img.endswith(".jpg")]
+  # Create an empty list to store processed images
+  all_images = []
+  # main function
+  for img_path in image_paths:
+      img = cv2.imread(img_path)
+      gray_img1 = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+      resized_img = cv2.resize(gray_img1, (size, size))
+      gray_img2 = resized_img[:, :, np.newaxis]
+
+      # Add processed image to list
+      all_images.append(gray_img2)
+  # Convert list to NumPy array
+  x = np.array(all_images)
+  return x
