@@ -71,7 +71,7 @@ def pic_preproc(img_load_path: str, size: int):
 
 def extract_ids(image_folder:str, ann_file:str):
   """
-    retirn final_ids which is in pic and ann file
+    return final_ids which is in pic and ann file
     image_folder: path to the image folder
     ann_file: path to the annotation file
   """
@@ -94,3 +94,37 @@ def extract_ids(image_folder:str, ann_file:str):
   final_id = list(set(img_ids) & set(id_list))
 
   return final_id
+
+
+def one_label_COCO(image_folder:str, ann_file:str):
+  """
+    return image id and uniq label (Select the class with the largest number of objects)
+    image_folder: path to the image folder
+    ann_file: path to the annotation file
+  """
+  # retirn final_ids which is in pic and ann file
+  image_ids = extract_ids(image_folder, ann_file)
+  
+  # Create a dictionary to store the final labels
+  img_to_label = {}
+
+  # Processing each image
+  for img_id in image_ids:
+      # Get image annotations
+      ann_ids = coco.getAnnIds(imgIds=img_id)
+      anns = coco.loadAnns(ann_ids)
+      
+      # Count the number of objects of each class
+      class_counts = {}
+      for ann in anns:
+          class_id = ann['category_id']
+          class_counts[class_id] = class_counts.get(class_id, 0) + 1
+      
+      # Select the class with the largest number of objects.
+      if class_counts:
+          dominant_class = max(class_counts, key=class_counts.get)
+          img_to_label[img_id] = dominant_class
+      else:
+          img_to_label[img_id] = None  # If the image has no objects
+
+  return img_to_label
