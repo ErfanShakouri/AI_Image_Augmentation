@@ -128,3 +128,42 @@ def one_label_COCO(image_folder:str, ann_file:str):
           img_to_label[img_id] = None  # If the image has no objects
 
   return img_to_label
+
+
+def pic_preproc_Intersection(image_folder:str, ann_file:str, size: int):
+  """
+  resize and add 1 dimention to the image.  return just Intersection images 
+  image_folder: path to the image folder
+  ann_file: path to the annotation file
+  size: size of Length and width
+  """
+  id_Intersection = extract_ids(image_folder, ann_file)
+  # A list to save the paths of the desired images
+  filtered_image_paths = []
+
+  # Reading image paths
+  image_paths = [os.path.join(image_folder, img) for img in os.listdir(image_folder) if img.lower().endswith(".jpg")]
+
+  # Filter image paths based on IDs in id_Intersection
+  for image_path in image_paths:
+      image_name = os.path.basename(image_path)
+      id_number = int(image_name.split('.')[0])  #Extracting ID from image name
+      if id_number in id_Intersection:
+          filtered_image_paths.append(image_path)  # Add image path to filtered list
+  
+  #####Preprocess function
+  all_images = []
+  # main function
+  for img_path in filtered_image_paths:
+      img = cv2.imread(img_path)
+      gray_img1 = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+      resized_img = cv2.resize(gray_img1, (size, size))
+      gray_img2 = resized_img[:, :, np.newaxis]
+      # Normalize pixel values to be between 0 and 1
+      gray_img2 = gray_img2 / 255.0 
+
+      # Add processed image to list
+      all_images.append(gray_img2)
+  # Convert list to NumPy array
+  x = np.array(all_images)
+  return x
