@@ -95,7 +95,6 @@ def extract_ids(image_folder:str, ann_file:str):
 
   return final_id
 
-
 def one_label_COCO(image_folder:str, ann_file:str):
   """
     return image id and uniq label (Select the class with the largest number of objects)
@@ -127,6 +126,9 @@ def one_label_COCO(image_folder:str, ann_file:str):
       else:
           img_to_label[img_id] = None  # If the image has no objects
 
+  #Sort Dict by id
+  img_to_label = dict(sorted(img_to_label.items()))
+
   return img_to_label
 
 
@@ -150,7 +152,9 @@ def pic_preproc_Intersection(image_folder:str, ann_file:str, size: int):
       id_number = int(image_name.split('.')[0])  #Extracting ID from image name
       if id_number in id_Intersection:
           filtered_image_paths.append(image_path)  # Add image path to filtered list
-  
+  # Sort the path
+  filtered_image_paths.sort(key=lambda x: int(x.split('/')[-1].split('.')[0]))
+  print(filtered_image_paths)
   #####Preprocess function
   all_images = []
   # main function
@@ -167,3 +171,4 @@ def pic_preproc_Intersection(image_folder:str, ann_file:str, size: int):
   # Convert list to NumPy array
   x = np.array(all_images)
   return x
+
