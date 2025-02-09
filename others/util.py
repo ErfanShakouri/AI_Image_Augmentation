@@ -3,8 +3,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 import sys
+import re
 
 from google.colab.patches import cv2_imshow
+from pycocotools.coco import COCO
 
 
 def segment_draw(img_path:str, segment_point):
@@ -65,3 +67,30 @@ def pic_preproc(img_load_path: str, size: int):
   # Convert list to NumPy array
   x = np.array(all_images)
   return x
+  
+
+def extract_ids(image_folder:str, ann_file:str):
+  """
+    retirn final_ids which is in pic and ann file
+    image_folder: path to the image folder
+    ann_file: path to the annotation file
+  """
+  coco = COCO(ann_file)
+  # List of ids in ann
+  img_ids = coco.getImgIds()
+
+  # path of images
+  image_list = os.listdir(image_folder)
+  id_list = []
+  for image_name in image_list:
+    if image_name.endswith(".jpg") or image_name.endswith(".jpeg"):
+      # Extracting ID using regular expression
+      match = re.search(r'\d+', image_name)
+      if match:
+        image_id = int(match.group())
+        id_list.append(image_id)
+
+  # Intersection of two list
+  final_id = list(set(img_ids) & set(id_list))
+
+  return final_id
