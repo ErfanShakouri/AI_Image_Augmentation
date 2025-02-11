@@ -103,7 +103,8 @@ def one_label_COCO(image_folder:str, ann_file:str):
   """
   # retirn final_ids which is in pic and ann file
   image_ids = extract_ids(image_folder, ann_file)
-  
+  # Define coco
+  coco = COCO(ann_file)   
   # Create a dictionary to store the final labels
   img_to_label = {}
 
