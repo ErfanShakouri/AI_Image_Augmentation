@@ -133,14 +133,12 @@ def one_label_COCO(image_folder:str, ann_file:str):
   return img_to_label
 
 
-
-def pic_preproc_Intersection(image_folder:str, ann_file:str, size: int, test_ration:float):
+def pic_preproc_Intersection(image_folder:str, ann_file:str, size: int):
   """
-  resize and add 1 dimention to the image.  return just Intersection images. split train and test 
+  resize and add 1 dimention to the image.  return just Intersection images.
   image_folder: path to the image folder
   ann_file: path to the annotation file
   size: size of Length and width
-  test_ration: test ration (float)
   """
   id_Intersection = extract_ids(image_folder, ann_file)
   # A list to save the paths of the desired images
@@ -173,10 +171,8 @@ def pic_preproc_Intersection(image_folder:str, ann_file:str, size: int, test_rat
       all_images.append(gray_img2)
   # Convert list to NumPy array
   all_pic = np.array(all_images)
-  # Split train and test
-  train_pic, test_pic = train_test_split(pic, test_size=test_ration, random_state=42)
 
-  return all_pic, train_pic, test_pic
+  return all_pic
 
 
 def onehot_labels(my_dict:dict, num_classes:int):
@@ -194,3 +190,15 @@ def onehot_labels(my_dict:dict, num_classes:int):
   for idx, (key, val) in enumerate(my_dict.items()):
       onehot_array[idx][val] = 1
   return onehot_array
+  
+  
+def train_test_splitt(x_all:np.ndarray, y_all:np.ndarray, test_ratio:float):
+  """
+  split train and test. for x and y
+  x_all: x data (input pic)
+  y_all: y data (label)
+  test_ratio:  test ratio (float)
+  """
+  # Splitting the data into train and test with a ratio of 80 to 20 percent
+  x_train, x_test, y_train, y_test,  = train_test_split(x_all,y_all, test_size=test_ratio , random_state=42)
+  return x_train, x_test, y_train, y_test
