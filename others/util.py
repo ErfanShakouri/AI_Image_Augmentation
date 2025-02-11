@@ -133,12 +133,14 @@ def one_label_COCO(image_folder:str, ann_file:str):
   return img_to_label
 
 
-def pic_preproc_Intersection(image_folder:str, ann_file:str, size: int):
+
+def pic_preproc_Intersection(image_folder:str, ann_file:str, size: int, test_ration:float):
   """
-  resize and add 1 dimention to the image.  return just Intersection images 
+  resize and add 1 dimention to the image.  return just Intersection images. split train and test 
   image_folder: path to the image folder
   ann_file: path to the annotation file
   size: size of Length and width
+  test_ration: test ration (float)
   """
   id_Intersection = extract_ids(image_folder, ann_file)
   # A list to save the paths of the desired images
@@ -170,6 +172,25 @@ def pic_preproc_Intersection(image_folder:str, ann_file:str, size: int):
       # Add processed image to list
       all_images.append(gray_img2)
   # Convert list to NumPy array
-  x = np.array(all_images)
-  return x
+  all_pic = np.array(all_images)
+  # Split train and test
+  train_pic, test_pic = train_test_split(pic, test_size=test_ration, random_state=42)
 
+  return all_pic, train_pic, test_pic
+
+
+def onehot_labels(my_dict:dict, num_classes:int):
+  """
+  changes the dictionary which has id and classes to one hot array
+  my_dict: main dictionary
+  num_classes: number of classes
+  """
+  # Number of classes
+  num_classes = num_classes
+  # Create a 2D array of the form (number of data, num_classes)
+  num_data = len(my_dict)
+  onehot_array = np.zeros((num_data, num_classes))
+  # Converting a dictionary to a one-hot two-dimensional array
+  for idx, (key, val) in enumerate(my_dict.items()):
+      onehot_array[idx][val] = 1
+  return onehot_array
