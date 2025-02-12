@@ -175,6 +175,45 @@ def pic_preproc_Intersection(image_folder:str, ann_file:str, size: int):
   return all_pic
 
 
+def pic_preproc_Intersection_3chan(image_folder:str, ann_file:str, size: int):
+  """
+  resize the image.  return just Intersection images.
+  image_folder: path to the image folder
+  ann_file: path to the annotation file
+  size: size of Length and width
+  """
+  id_Intersection = extract_ids(image_folder, ann_file)
+  # A list to save the paths of the desired images
+  filtered_image_paths = []
+
+  # Reading image paths
+  image_paths = [os.path.join(image_folder, img) for img in os.listdir(image_folder) if img.lower().endswith(".jpg")]
+
+  # Filter image paths based on IDs in id_Intersection
+  for image_path in image_paths:
+      image_name = os.path.basename(image_path)
+      id_number = int(image_name.split('.')[0])  #Extracting ID from image name
+      if id_number in id_Intersection:
+          filtered_image_paths.append(image_path)  # Add image path to filtered list
+  # Sort the path
+  filtered_image_paths.sort(key=lambda x: int(x.split('/')[-1].split('.')[0]))
+  print(filtered_image_paths)
+  #####Preprocess function
+  all_images = []
+  # main function
+  for img_path in filtered_image_paths:
+      img = cv2.imread(img_path)
+      resized_img = cv2.resize(img, (size, size))
+      # Normalize pixel values to be between 0 and 1
+      resized_img = resized_img / 255.0
+      # Add processed image to list
+      all_images.append(resized_img)
+  # Convert list to NumPy array
+  all_pic = np.array(all_images)
+
+  return all_pic
+
+
 def onehot_labels(my_dict:dict, num_classes:int):
   """
   changes the dictionary which has id and classes to one hot array
